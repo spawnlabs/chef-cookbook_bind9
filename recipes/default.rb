@@ -2,7 +2,7 @@
 # Cookbook Name:: bind9
 # Recipe:: default
 #
-# Copyright 2011, Mike Adolphs
+# Copyright 2013, Chris Doughty 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,13 +40,29 @@ service "bind9" do
   action [ :enable ]
 end
 
-template node[:bind9][:options_file] do
-  source "named.conf.options.erb"
+template "/etc/bind/db.root" do
+  source "db.root.erb"
   owner "root"
   group "root"
   mode 0644
-  notifies :restart, resources(:service => "bind9")
+  notifies :reload, "service[bind9]"
 end
+
+template "/etc/default/bind9" do
+  source "bind9.erb"
+  owner "root"
+  group "root"
+  mode 0644
+  notifies :restart, "service[bind9]"
+end
+
+#template node[:bind9][:options_file] do
+#  source "named.conf.options.erb"
+#  owner "root"
+#  group "root"
+#  mode 0644
+#  notifies :restart, resources(:service => "bind9")
+#end
 
 template node[:bind9][:local_file] do
   source "named.conf.local.erb"
@@ -56,7 +72,7 @@ template node[:bind9][:local_file] do
   variables({
     :zonefiles => search(:zones)
   })
-  notifies :restart, resources(:service => "bind9")
+  notifies :reload, resources(:service => "bind9")
 end
 
 
@@ -72,20 +88,20 @@ search(:zones).each do |zone|
     end
   end
 
-  template "#{node[:bind9][:config_path]}/#{zone['domain']}" do
-    source "#{node[:bind9][:config_path]}/#{zone['domain']}.erb"
+  template "#{node[:bind9][:data_path]}/#{zone['domain']}" do
+    source "#{node[:bind9][:data_path]}/#{zone['domain']}.erb"
     local true
     owner "root"
     group "root"
     mode 0644
-    notifies :restart, resources(:service => "bind9")
+    notifies :reload, resources(:service => "bind9")
     variables({
       :serial => Time.new.strftime("%Y%m%d%H%M%S")
     })
     action :nothing
   end
 
-  template "#{node[:bind9][:config_path]}/#{zone['domain']}.erb" do
+  template "#{node[:bind9][:data_path]}/#{zone['domain']}.erb" do
     source "zonefile.erb"
     owner "root"
     group "root"
@@ -99,7 +115,7 @@ search(:zones).each do |zone|
       :mail_exchange => zone['zone_info']['mail_exchange'],
       :records => zone['zone_info']['records']
     })
-    notifies :create, resources(:template => "#{node[:bind9][:config_path]}/#{zone['domain']}"), :immediately
+    notifies :create, resources(:template => "#{node[:bind9][:data_path]}/#{zone['domain']}"), :immediately
   end
 end
 
