@@ -40,6 +40,24 @@ service "bind9" do
   action [ :enable ]
 end
 
+execute "freeze" do
+  command "rndc freeze"
+  returns [ 0 , 1 ]
+  action :nothing
+end
+
+execute "thaw" do
+  command "rndc thaw"
+  returns [ 0 , 1 ]
+  action :nothing
+end
+
+execute "reload" do
+  command "rndc reload"
+  returns [ 0 , 1 ]
+  action :nothing
+end
+
 template "/etc/bind/db.root" do
   source "db.root.erb"
   owner "root"
@@ -55,14 +73,6 @@ template "/etc/default/bind9" do
   mode 0644
   notifies :restart, "service[bind9]"
 end
-
-#template node[:bind9][:options_file] do
-#  source "named.conf.options.erb"
-#  owner "root"
-#  group "root"
-#  mode 0644
-#  notifies :restart, resources(:service => "bind9")
-#end
 
 template node[:bind9][:local_file] do
   source "named.conf.local.erb"
@@ -94,7 +104,9 @@ search(:zones).each do |zone|
     owner "root"
     group "root"
     mode 0644
-    notifies :reload, resources(:service => "bind9")
+    notifies :run, "execute[freeze]", :immediately
+    notifies :run, "execute[reload]", :immediately
+    notifies :run, "execute[thaw]", :immediately
     variables({
       :serial => Time.new.strftime("%Y%m%d%H%M%S")
     })
