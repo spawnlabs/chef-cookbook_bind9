@@ -18,7 +18,7 @@ zone "<%= conf["domain"] %>" IN {
   type <%= conf["type"] %>;
   file "<%= node[:bind9][:data_path] %>/<%= conf["domain"] %>";
   notify no;
-  <% if node[:bind9][:enable_ddns] %>
+  <% if node[:bind9][:enable_ddns] and conf["ddns"] %>
   allow-update { key DDNS_UPDATE; };
   <% end %>
 };
