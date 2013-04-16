@@ -40,24 +40,6 @@ service "bind9" do
   action [ :enable ]
 end
 
-execute "freeze" do
-  command "rndc freeze"
-  returns [ 0 , 1 ]
-  action :nothing
-end
-
-execute "thaw" do
-  command "rndc thaw"
-  returns [ 0 , 1 ]
-  action :nothing
-end
-
-execute "reload" do
-  command "rndc reload"
-  returns [ 0 , 1 ]
-  action :nothing
-end
-
 template "/etc/bind/db.root" do
   source "db.root.erb"
   owner "root"
@@ -104,9 +86,7 @@ search(:zones).each do |zone|
     owner "root"
     group "root"
     mode 0644
-    notifies :run, "execute[freeze]", :immediately
-    notifies :run, "execute[reload]", :immediately
-    notifies :run, "execute[thaw]", :immediately
+    notifies :reload, resources(:service => "bind9") 
     variables({
       :serial => Time.new.strftime("%Y%m%d%H%M%S")
     })
