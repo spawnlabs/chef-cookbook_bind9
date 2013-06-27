@@ -1,7 +1,8 @@
 default[:bind9][:enable_ipv6] = true
 
 # Allow all clients to query the nameserver, no recursion
-default[:bind9][:allow_query] = nil
+default[:bind9][:allow_query] = nil 
+default[:bind9][:allow_query_cache] = nil 
 default[:bind9][:allow_recursion] = "none"
 
 # Don:t allow to mess with zone files by default

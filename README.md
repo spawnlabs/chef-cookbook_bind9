@@ -22,6 +22,7 @@ Attributes
 
 * **node[:bind9][:enable_ipv6]**       - Enables BIND to listen on an IPv6 address. Default is: On
 * **node[:bind9][:allow_query]**       - Allow clients to query the nameserver. Default is: anyone
+* **node[:bind9][:allow_query_cache]** - Allow clients to query the nameserver cache. Default is: anyone
 * **node[:bind9][:allow_recursion]**   - Allow recursive name resolution. Default is: none (to prevent DNS cache poisoning)
 * **node[:bind9][:allow_update]**      - Allow dynamic DNS updates. Default is: none
 * **node[:bind9][:allow_transfer]**    - Allow zone transfers globally. Default is: none
