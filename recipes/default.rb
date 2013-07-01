@@ -56,13 +56,13 @@ template "/etc/default/bind9" do
   notifies :restart, "service[bind9]"
 end
 
-template node[:bind9][:options_file] do
-  source "named.conf.options.erb"
-  owner "root"
-  group "root"
-  mode 0644
-  notifies :restart, resources(:service => "bind9")
-end
+#template node[:bind9][:options_file] do
+#  source "named.conf.options.erb"
+#  owner "root"
+#  group "root"
+#  mode 0644
+#  notifies :restart, resources(:service => "bind9")
+#end
 
 template node[:bind9][:local_file] do
   source "named.conf.local.erb"
@@ -92,7 +92,7 @@ search(:zones).each do |zone|
     source "#{node[:bind9][:data_path]}/#{zone['domain']}.erb"
     local true
     owner "bind"
-    group "bind"
+    group "dhcpd"
     mode 0664
     notifies :reload, resources(:service => "bind9") 
     variables({
@@ -104,7 +104,7 @@ search(:zones).each do |zone|
   template "#{node[:bind9][:data_path]}/#{zone['domain']}.erb" do
     source "zonefile.erb"
     owner "bind"
-    group "bind"
+    group "dhcpd"
     mode 0664
     variables({
       :domain => zone['domain'],
